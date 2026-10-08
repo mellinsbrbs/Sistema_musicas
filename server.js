@@ -12,10 +12,6 @@ app.get("/", (req, res) => {
     res.status(200).json({ mensagem: "API Sistema de Música funcionando!" });
 });
 
-app.listen(PORTA, () => {
-    console.log(`Servidor rodando em http://localhost:${PORTA}`);
-});
-
 app.get("/artistas", (req, res) => {
     const sql = "SELECT * FROM artistas";
 
@@ -26,6 +22,44 @@ app.get("/artistas", (req, res) => {
             res.status(200).json(resultado);
     });
 });
+
+app.get("/", (req, res) => {
+    res.status(200).json({ mensagem: "API Sistema de Música funcionando!" });
+});
+
+app.get("/artistas/:id", (req, res) => {
+
+    // const id = Number(req.params.id);
+    // const sql = `SELECT * FROM artistas WHERE id = ${id}`;
+    
+    conexao.query(sql, (erro, resultado) => {
+        if(resultado.length === 0) {
+            return res.status(404).json({ erro: "Artista não encontrado" });
+        }
+        res.status(200).json(resultado[0]);
+    });
+});
+app.post("/artistas", (req, res) =>{
+    const {nome, genero, pais} = req.body;
+
+    const sql = `INSERT INTO artistas (nome, genero, pais) VALUES(?, ?, ?)`;
+
+    conexao.query(sql, [nome, genero, pais] , (erro, resultado)=>{
+        if (erro){
+            return res.status(500).json({
+                erro: "Erro ao listar artistas"
+            });
+        }
+
+        res.status(201).json({
+            mensagem : "Artista cadastrado com sucesso",
+            id: resultado.insertId
+        });
+    });
+});
+
+app.delete("/artistas/:id", (req, res) => {});
+
 
 app.listen(PORTA, () => {
     console.log(`Servidor rodando em http://localhost:${PORTA}`);
